@@ -3,34 +3,33 @@ const cors = require('cors')
 let app = express();
 app.use(express.json())
 app.use(cors())
+const bcrypt = require('bcrypt');
 let UserModel = require("./models/user")
 
 
 app.get('/', (req, res) => {
   res.send("Helllow")
 });
-app.post('/create', async (req, res) => {
-  let { name, messege, email } = req.body;
-  let userCreated = await UserModel.create({
-    name,
-    email,
-    messege,
-  })
-  res.json(userCreated);
-});
-app.get('/read', async (req, res) => {
-  let messege = await UserModel.find();
-  res.json({
-    messege
+
+
+app.post('/create', (req, res) => {
+  let { name, password, username, email } = req.body;
+  const saltRounds = 10;
+  bcrypt.genSalt(saltRounds, function (err, salt) {
+    bcrypt.hash(password, salt, async (err, hash) => {
+      // Store hash in your password DB.
+      let userCreated = await UserModel.create({
+        username,
+        name,
+        email,
+        password: hash,
+      })
+      res.json(userCreated);
+    });
   });
 });
-app.delete('/delete/:id', async (req, res) => {
-  let deleted = await UserModel.findOneAndDelete({_id:req.params.id});
-  // res.redirect("/messeges");
-  res.json(deleted);
-});
 
-app.listen(3000, () => {
+app.listen(4000, () => {
   console.log("Server Start");
 
 })
