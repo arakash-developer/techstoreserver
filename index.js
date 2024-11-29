@@ -27,13 +27,34 @@ app.post('/create', (req, res) => {
         email,
         password: hash,
       })
-      var token = jwt.sign({ email }, 'Akash');
+      let token = jwt.sign({ email }, 'Akash');
       res.cookie("token", token);
       res.json(userCreated);
     });
   });
 });
 
+app.post('/login', async (req, res) => {
+  let { password, email } = req.body;
+  let user = await UserModel.findOne({ email: email })
+  if (!user) return res.json("Something Is Wrong")
+  bcrypt.compare(password, user.password, function (err, result) {
+    // result == true
+    if (result) {
+      let token = jwt.sign({ email }, 'Akash');
+      res.cookie("token", token);
+      res.json({ result });
+    } else {
+      res.json({ result: false });
+    }
+  });
+
+})
+
+app.get('/logout', (req, res) => {
+  res.cookie("token", "");
+  res.json("Log out")
+})
 app.listen(4000, () => {
   console.log("Server Start");
 
