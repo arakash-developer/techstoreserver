@@ -1,9 +1,12 @@
 const express = require('express')
+let cookieParser = require('cookie-parser')
+const bcrypt = require('bcrypt');
+var jwt = require('jsonwebtoken');
 const cors = require('cors')
 let app = express();
 app.use(express.json())
 app.use(cors())
-const bcrypt = require('bcrypt');
+app.use(cookieParser())
 let UserModel = require("./models/user")
 
 
@@ -24,6 +27,8 @@ app.post('/create', (req, res) => {
         email,
         password: hash,
       })
+      var token = jwt.sign({ email }, 'Akash');
+      res.cookie("token", token);
       res.json(userCreated);
     });
   });
